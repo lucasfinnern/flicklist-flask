@@ -1,9 +1,8 @@
 from flask import request, redirect, render_template, session, flash
-# from flask_sqlalchemy import SQLAlchemy
-# from models import User, Movie
 import cgi
 from app import app, db
 from models import User, Movie
+from hashutils import make_salt, make_pw_hash, check_pw_hash
 
 # a list of movie names that nobody should have to watch
 terrible_movies = [
@@ -30,9 +29,9 @@ def login():
         users = User.query.filter_by(email=email)
         if users.count() == 1:
             user = users.first()
-            if password == user.password:
+            if check_pw_hash(password, user.pw_hash):
                 session['user'] = user.email
-                flash('welcome back, '+user.email)
+                flash('welcome back, ' + user.email)
                 return redirect("/")
         flash('bad username or password')
         return redirect("/login")
